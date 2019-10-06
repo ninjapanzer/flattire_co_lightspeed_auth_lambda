@@ -1,13 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
-	"lightspeed_auth_lambda/auth_reciever"
-	"log"
-	"strconv"
-
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"lightspeed_auth_lambda/auth_reciever"
+	"log"
 )
 
 var (
@@ -29,12 +28,12 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	authResp := auth_reciever.ExchangeCode(request.QueryStringParameters["code"])
+	str, _ := json.Marshal(&authResp)
 
 	return events.APIGatewayProxyResponse{
-		Body:       "Hello token: " + authResp.AccessToken + " expires in: " + strconv.FormatInt(authResp.ExpiresIn, 10),
+		Body:       string(str),
 		StatusCode: 200,
 	}, nil
-
 }
 
 func main() {

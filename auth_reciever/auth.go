@@ -19,10 +19,10 @@ type AuthTokenRequest struct {
 }
 
 type AccessTokenResponse struct {
-	AccessToken string `json:"access_token"`
-	ExpiresIn int64 `json:"expires_in"`
-	TokenType string `json:"token_type"`
-	Scope string `json:"scope"`
+	AccessToken  string `json:"access_token"`
+	ExpiresIn    int16  `json:"expires_in"`
+	TokenType    string `json:"token_type"`
+	Scope        string `json:"scope"`
 	RefreshToken string `json:"refresh_token"`
 }
 
@@ -53,15 +53,23 @@ func ExchangeCode(code string) (accessToken AccessTokenResponse) {
 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 
-	resp, err := client.Do(r)
+	if resp, err := client.Do(r); err != nil {
+		log.Print(err)
+	} else {
+		body, _ := ioutil.ReadAll(resp.Body)
+		json.Unmarshal([]byte(body), &accessToken)
+		Save(
+			accessToken.AccessToken,
+			accessToken.TokenType,
+			accessToken.ExpiresIn,
+		)
 
-	//resp, err := http.Post("https://cloud.lightspeedapp.com/oauth/access_token.php", "application/x-www-form-urlencoded", bytes.NewBuffer(payload))
-	log.Print(err, resp)
-	body, err := ioutil.ReadAll(resp.Body)
-	log.Print(resp.Body, err)
-	mes := json.Unmarshal([]byte(body), &accessToken)
+		Save(
+			accessToken.RefreshToken,
+			"refresh_token",
+			accessToken.ExpiresIn,
+		)
+	}
 
-	log.Print(mes)
-	log.Print(body)
-	return
+	return accessToken
 }

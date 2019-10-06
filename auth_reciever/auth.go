@@ -1,6 +1,7 @@
 package auth_reciever
 
 import (
+	"authorization_token_repo"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -58,15 +59,13 @@ func ExchangeCode(code string) (accessToken AccessTokenResponse) {
 	} else {
 		body, _ := ioutil.ReadAll(resp.Body)
 		json.Unmarshal([]byte(body), &accessToken)
-		Save(
+		authorization_token_repo.SaveBearer(
 			accessToken.AccessToken,
-			accessToken.TokenType,
 			accessToken.ExpiresIn,
 		)
 
-		Save(
+		authorization_token_repo.SaveRefresh(
 			accessToken.RefreshToken,
-			"refresh_token",
 			accessToken.ExpiresIn,
 		)
 	}

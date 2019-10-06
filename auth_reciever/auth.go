@@ -1,8 +1,8 @@
 package auth_reciever
 
 import (
-	"authorization_token_repo"
 	"encoding/json"
+	"github.com/ninjapanzer/flattireco_auth_repo"
 	"io/ioutil"
 	"log"
 	"net/http"
